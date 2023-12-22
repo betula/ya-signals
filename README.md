@@ -14,13 +14,12 @@ yarn add betula/ya-signals
 
 - [Ya Signals](#ya-signals)
   - [Installation](#installation)
-  - [Delightful React Integration](#delightful-react-integration)
-    - [Rendering optimizations](#rendering-optimizations)
+  - [React Integration](#react-integration)
   - [Guide / API](#guide--api)
-    - [`signal(initialValue)`](#signalinitialvalue)
-    - [`computed(fn)`](#computedfn)
     - [Class Decorators](#class-decorators)
       - [`@signal`, `@computed`](#signal-computed)
+    - [`signal(initialValue)`](#signalinitialvalue)
+    - [`computed(fn)`](#computedfn)
     - [`autorun(fn)`](#autorunfn)
     - [`reaction(fn,fn)`](#reactionfnfn)
     - [`sync(fn,fn)`](#syncfnfn)
@@ -127,7 +126,6 @@ console.log(fullName.value);
 ```
 
 Any signal that is accessed inside the `computed`'s callback function will be automatically subscribed to and tracked as a dependency of the computed signal.
-
 
 ### `autorun(fn)`
 
@@ -276,7 +274,6 @@ autorun(() => {
 	effectCount.value = untracked(fn);
 });
 ```
-
 
 ### `transaction(fn)`
 
