@@ -57,6 +57,35 @@ In practice this makes MobX applications very well optimized out of the box and 
 
 ## Guide / API
 
+### Class Decorators
+
+#### `@signal`, `@computed`
+
+For convenient OOP-style coding, the clearest and most minimalistic way to describe reactive signals, are decorators. Currently, many mainstream frameworks use decorators for annotations, and we will take advantage of this feature as well.
+
+```typescript
+import { signal, computed } from "ya-signals"
+
+class Todo {
+  id = Math.random()
+  @signal title = ""
+  @signal finished = false
+
+  toggle() {
+    this.finished = !this.finished
+  }
+}
+
+class TodoList {
+  @signal todos = []
+
+  @computed
+  get unfinishedTodoCount() {
+    return this.todos.filter(todo => !todo.finished).length
+  }
+}
+```
+
 ### `signal(initialValue)`
 
 The `signal` function creates a new signal. A signal is a container for a value that can change over time. You can read a signal's value or subscribe to value updates by accessing its `.value` property.
@@ -98,35 +127,6 @@ console.log(fullName.value);
 ```
 
 Any signal that is accessed inside the `computed`'s callback function will be automatically subscribed to and tracked as a dependency of the computed signal.
-
-### Class Decorators
-
-#### `@signal`, `@computed`
-
-For convenient OOP-style coding, the clearest and most minimalistic way to describe reactive signals, are decorators. Currently, many mainstream frameworks use decorators for annotations, and we will take advantage of this feature as well.
-
-```typescript
-import { signal, computed } from "ya-signals"
-
-class Todo {
-  id = Math.random()
-  @signal title = ""
-  @signal finished = false
-
-  toggle() {
-    this.finished = !this.finished
-  }
-}
-
-class TodoList {
-  @signal todos = []
-
-  @computed
-  get unfinishedTodoCount() {
-    return this.todos.filter(todo => !todo.finished).length
-  }
-}
-```
 
 
 ### `autorun(fn)`
