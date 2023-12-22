@@ -2,10 +2,9 @@
 
 _React application framework based on MobX._
 
-Signals is a performant state management library with two primary goals:
+Signals is a performant state management library with one primary goal:
 
-- Make it as easy as possible to write business logic for small up to complex apps. No matter how complex your logic is, your app updates should stay fast without you needing to think about it. Signals automatically optimize state updates behind the scenes to trigger the fewest updates necessary. They are lazy by default and automatically skip signals that no one listens to.
-- Integrate into frameworks as if they were native built-in primitives. You don't need any selectors, wrapper functions, or anything else. Signals can be accessed directly and your component will automatically re-render when the signal's value changes.
+- Make it as easy as possible to write business logic for small up to complex apps.
 
 ## Installation
 
@@ -28,7 +27,7 @@ yarn add betula/ya-signals
     - [`when(fn)`](#whenfn)
     - [`untracked(fn)`](#untrackedfn)
     - [`transaction(fn)`](#transactionfn)
-  - [Undocumented API](#undocumented-api)
+  - [Extra API](#extra-api)
     - [Simple and fast actions abstraction](#simple-and-fast-actions-abstraction)
     - [Automatic unsubscription control](#automatic-unsubscription-control)
     - [On demand services](#on-demand-services)
@@ -342,7 +341,7 @@ transaction(() => {
 ```
 
 
-## Undocumented API
+## Extra API
 
 ### Simple and fast actions abstraction
 
