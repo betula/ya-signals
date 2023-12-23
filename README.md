@@ -24,7 +24,7 @@ npm install ya-signals
 ### On demand services
 
 ```typescript
-import { service, un } from "ya-signals";
+import { service } from "ya-signals";
 
 class UserServer {
   constructor() {}
@@ -52,23 +52,34 @@ service.destroy(userService);
 ### Describe component logic in OOP-style
 
 ```typescript
-import { hook, un } from "ya-signals";
+import { hook, un, type SignalReadonly } from "ya-signals";
 
-class RecipeForm {
-  constructor(
-    //(params proposal)
-    //private signalOfParam1,
-    //private signalOfParam2
-  ) {
+export class RecipeForm {
+  constructor(signalParams: SignalReadonly<[number, string]>) {
     un(() => {
       // destroy
     })
+
+    signalParams.sync((params) => {
+      console.log('Current params values', params);
+    });
   }
 }
 
-useRecipeForm = hook(RecipeForm)
+export const useRecipeForm = hook(RecipeForm)
+```
 
-const form = useRecipeForm(/*(params proposal) param1, param2*/)
+Somewhere inside React component function
+
+```typescript
+import { useRecipeForm } from './recipe-form.ts';
+
+function Form() {
+  const form = useRecipeForm([10, 'hello']); // params available here
+
+  return <>
+  // ...
+}
 ```
 
 ## API Reference
