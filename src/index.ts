@@ -10,7 +10,10 @@ export {
   untracked,
   transaction,
   makeAutoObservable,
-  makeObservable
+  makeObservable,
+  computed,
+  observable,
+  action
 } from 'mobx';
 
 import './configure';
