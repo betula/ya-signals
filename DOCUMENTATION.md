@@ -169,7 +169,7 @@ reaction(
     } else {
         console.log("I'm not hungry!")
     }
-    console.log("Energy level:", giraffe.energyLevel)
+    console.log("Energy level:", giraffe.energyLevel.value)
   }
 )
 
@@ -232,10 +232,10 @@ const counter = signal(0);
 const effectCount = signal(0);
 
 autorun(() => {
-	console.log(counter.value);
+  console.log(counter.value);
 
-	// Whenever this effect is triggered, run function that gives new value
-	effectCount(untracked(() => {
+  // Whenever this effect is triggered, run function that gives new value
+  effectCount(untracked(() => {
     return effectCount.value + 1;
   }));
 });
@@ -258,8 +258,8 @@ autorun(() => console.log(fullName.value));
 // Combines both signal writes into one update. Once the callback
 // returns the `autorun` will trigger and we'll log "Foo Bar"
 transaction(() => {
-	name("Foo");
-	surname("Bar");
+  name("Foo");
+  surname("Bar");
 });
 ```
 
@@ -275,10 +275,10 @@ const triple = wrap(() => counter.value * 3);
 autorun(() => console.log(double.value, triple.value));
 
 transaction(() => {
-	counter(1);
-	// Logs: 2, despite being inside transaction, but `triple`
-	// will only update once the callback is complete
-	console.log(double.value);
+  counter(1);
+  // Logs: 2, despite being inside transaction, but `triple`
+  // will only update once the callback is complete
+  console.log(double.value);
 });
 // Now we reached the end of the transaction and call the autorun
 ```
@@ -292,13 +292,13 @@ const counter = signal(0);
 autorun(() => console.log(counter.value));
 
 transaction(() => {
-	transaction(() => {
-		// Signal is invalidated, but update is not flushed because
-		// we're still inside another transaction
-		counter(1);
-	});
+  transaction(() => {
+    // Signal is invalidated, but update is not flushed because
+    // we're still inside another transaction
+    counter(1);
+  });
 
-	// Still not updated...
+  // Still not updated...
 });
 // Now the callback completed and we'll trigger the autorun.
 ```
