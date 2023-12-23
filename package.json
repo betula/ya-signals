@@ -1,6 +1,6 @@
 {
   "name": "ya-signals",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "React application architecture on MobX.",
   "main": "dist/index.js",
   "files": [
