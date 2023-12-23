@@ -1,14 +1,12 @@
-import { service, un, signal, computed } from "../src";
+import { service, un, signal, wrap } from "../src";
 
 it('service works', () => {
   const create_spy = jest.fn();
   const destroy_spy = jest.fn();
 
   class A {
-    @signal m = 1;
-    @computed get c() {
-      return this.m + 1;
-    }
+    m = signal(1);
+    c = wrap(() => this.m.value + 1);
 
     constructor() {
       create_spy();
@@ -26,9 +24,9 @@ it('service works', () => {
   expect(s.a()).toBe(1);
   expect(create_spy).toBeCalled();
 
-  expect(s.c).toBe(2);
-  s.m += 1;
-  expect(s.c).toBe(3);
+  expect(s.c.value).toBe(2);
+  s.m.update(v => v + 1);
+  expect(s.c.value).toBe(3);
 
   expect(destroy_spy).not.toBeCalled();
   service.destroy(s);
@@ -37,8 +35,8 @@ it('service works', () => {
   create_spy.mockReset();
   destroy_spy.mockReset();
 
-  s.m = 2;
-  expect(s.c).toBe(3);
+  s.m(2);
+  expect(s.c.value).toBe(3);
   expect(create_spy).toBeCalled();
 
   expect(destroy_spy).not.toBeCalled();

@@ -28,7 +28,7 @@ it('hook works', () => {
   const destroy_spy = jest.fn();
   
   class A {
-    @signal a: number;
+    a = signal<number>(0);
     b = 0;
     constructor() {
       unsubs = scope();
@@ -36,7 +36,7 @@ it('hook works', () => {
       un(destroy_spy);
 
       autorun(() => {
-        this.b = (this.a || 0) + 10;
+        this.b = (this.a.value || 0) + 10;
       });
     }
   }
@@ -45,7 +45,7 @@ it('hook works', () => {
   const inst = useA();
 
   expect(inst.b).toBe(10);
-  inst.a = 10;
+  inst.a(10);
   expect(inst.b).toBe(20);
   
   expect(create_spy).toBeCalled();
