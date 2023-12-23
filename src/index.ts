@@ -1,6 +1,6 @@
 export {
   type Signal,
-  type ReadonlySignal,
+  type SignalReadonly,
   signal,
   wrap
 } from './signal';

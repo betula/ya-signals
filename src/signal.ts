@@ -1,14 +1,14 @@
 import { observable, untracked, computed as mobxComputed, comparer } from 'mobx';
 import { reaction, sync } from './reaction';
 
-export interface ReadonlySignal<T> {
+export interface SignalReadonly<T> {
   get value(): T;
   get(): T;
   subscribe(listener: (current: T, prev: T) =>void): () => void;
   sync(listener: (current: T, prev: T | undefined) =>void): () => void;
 }
 
-export interface Signal<T> extends ReadonlySignal<T> {
+export interface Signal<T> extends SignalReadonly<T> {
   (value: T): T,
   update(fn: (value: T) => T);
 }
@@ -20,17 +20,17 @@ export function signal<T>(value: T): Signal<T> {
     return make(get, set);
 }
 
-export function wrap<T>(readfn: () => T): ReadonlySignal<T>;
+export function wrap<T>(readfn: () => T): SignalReadonly<T>;
 export function wrap<T>(readfn: () => T, writefn: (value: T) => void): Signal<T>;
-export function wrap<T>(readfn: () => T, writefn?: (value: T) => void): (ReadonlySignal<T> | Signal<T>) {
+export function wrap<T>(readfn: () => T, writefn?: (value: T) => void): (SignalReadonly<T> | Signal<T>) {
   const box = mobxComputed(readfn, { equals: comparer.shallow });
   const get = box.get.bind(box);
   return make(get, writefn);
 }
 
-function make<T>(readfn: () => T): ReadonlySignal<T>;
+function make<T>(readfn: () => T): SignalReadonly<T>;
 function make<T>(readfn: () => T, writefn: (value: T) => void): Signal<T>;
-function make<T>(readfn: () => T, writefn?: (value: T) => void): (ReadonlySignal<T> | Signal<T>) {
+function make<T>(readfn: () => T, writefn?: (value: T) => void): (SignalReadonly<T> | Signal<T>) {
     const get = readfn;
     const h = writefn || {};
     Object.defineProperty(h, 'value', { get })
