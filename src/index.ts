@@ -5,8 +5,13 @@ export {
   wrap
 } from './signal';
 
-export { observer as component } from 'mobx-react-lite';
-export { untracked, transaction } from 'mobx';
+export { observer } from 'mobx-react-lite';
+export {
+  untracked,
+  transaction,
+  makeAutoObservable,
+  makeObservable
+} from 'mobx';
 
 import './configure';
 

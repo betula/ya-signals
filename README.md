@@ -8,7 +8,7 @@ _React application architecture on MobX._
 ## Installation
 
 ```bash
-yarn add betula/ya-signals
+npm install ya-signals
 ```
 
 - [Ya Signals](#ya-signals)
@@ -16,6 +16,7 @@ yarn add betula/ya-signals
   - [Logic](#logic)
     - [On demand services](#on-demand-services)
     - [Describe component logic in OOP-style](#describe-component-logic-in-oop-style)
+  - [API Reference](#api-reference)
   - [License](#license)
 
 ## Logic
@@ -69,6 +70,10 @@ useRecipeForm = hook(RecipeForm)
 
 const form = useRecipeForm(/*(params proposal) param1, param2*/)
 ```
+
+## API Reference
+
+  - [Documentation](/DOCUMENTATION.md)
 
 ## License
 ISC

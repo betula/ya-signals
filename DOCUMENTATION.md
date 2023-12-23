@@ -5,7 +5,7 @@ _React application architecture on MobX._
 ## Installation
 
 ```bash
-yarn add betula/ya-signals
+npm install ya-signals
 ```
 
 - [Ya Signals](#ya-signals)
@@ -13,7 +13,7 @@ yarn add betula/ya-signals
   - [React Integration](#react-integration)
   - [Guide / API](#guide--api)
     - [`signal(initialValue)`](#signalinitialvalue)
-    - [`computed(fn)`](#computedfn)
+    - [`wrap(fn)`](#wrapfn)
     - [`autorun(fn)`](#autorunfn)
     - [`reaction(fn,fn)`](#reactionfnfn)
     - [`sync(fn,fn)`](#syncfnfn)
@@ -33,18 +33,18 @@ yarn add betula/ya-signals
 React adapter allows you to access signals directly inside your components and will automatically subscribe to them.
 
 ```typescript
-import { component, signal } from "ya-signals";
+import { observer, signal } from "ya-signals";
 
 const count = signal(0);
 
-const CounterValue = component(() {
+const CounterValue = observer(() {
 	// Whenever the `count` signal is updated, we'll
 	// re-render this component automatically for you
 	return <p>Value: {count.value}</p>;
 })
 ```
 
-The `component` HoC automatically subscribes React components to any observables that are used during rendering. As a result, components will automatically re-render when relevant observables change. It also makes sure that components don't re-render when there are no relevant changes. So, observables that are accessible by the component, but not actually read, won't ever cause a re-render.
+The `observer` HoC automatically subscribes React components to any observables that are used during rendering. As a result, components will automatically re-render when relevant observables change. It also makes sure that components don't re-render when there are no relevant changes. So, observables that are accessible by the component, but not actually read, won't ever cause a re-render.
 
 In practice this makes MobX applications very well optimized out of the box and they typically don't need any additional code to prevent excessive rendering.
 
@@ -68,57 +68,57 @@ counter(1);
 
 Writing to a signal is done by calling as a function. Changing a signal's value synchronously updates every [computed](#computedfn) and [autorun](#autorunfn) that depends on that signal, ensuring your app state is always consistent.
 
-### `computed(fn)`
+### `wrap(fn)`
 
-Data is often derived from other pieces of existing data. The `computed` function lets you combine the values of multiple signals into a new signal that can be reacted to, or even used by additional computeds. When the signals accessed from within a computed callback change, the computed callback is re-executed and its new return value becomes the computed signal's value.
+Data is often derived from other pieces of existing data. The `wrap` function lets you combine the values of multiple signals into a new signal that can be reacted to, or even used by additional computeds. When the signals accessed from within a computed callback change, the computed callback is re-executed and its new return value becomes the computed signal's value.
 
 ```js
-import { signal, computed } from "ya-signals";
+import { signal, wrap } from "ya-signals";
 
 const name = signal("Jane");
 const surname = signal("Doe");
 
-const fullName = computed(() => name.value + " " + surname.value);
+const fullName = wrap(() => name.value + " " + surname.value);
 
 // Logs: "Jane Doe"
 console.log(fullName.value);
 
-// Updates flow through computed, but only if someone
+// Updates flow through wrap, but only if someone
 // subscribes to it. More on that later.
-name.value = "John";
+name("John");
 // Logs: "John Doe"
 console.log(fullName.value);
 ```
 
-Any signal that is accessed inside the `computed`'s callback function will be automatically subscribed to and tracked as a dependency of the computed signal.
+Any signal that is accessed inside the `wrap`'s callback function will be automatically subscribed to and tracked as a dependency of the struct computed signal.
 
 ### `autorun(fn)`
 
-The `autorun` function is the last piece that makes everything reactive. When you access a signal inside its callback function, that signal and every dependency of said signal will be activated and subscribed to. In that regard it is very similar to [`computed(fn)`](#computedfn). By default all updates are lazy, so nothing will update until you access a signal inside `autorun`.
+The `autorun` function is the last piece that makes everything reactive. When you access a signal inside its callback function, that signal and every dependency of said signal will be activated and subscribed to. In that regard it is very similar to [`wrap(fn)`](#wrapfn). By default all updates are lazy, so nothing will update until you access a signal inside `autorun`.
 
 ```js
-import { signal, computed, autorun } from "ya-signals";
+import { signal, wrap, autorun } from "ya-signals";
 
 const name = signal("Jane");
 const surname = signal("Doe");
-const fullName = computed(() => name.value + " " + surname.value);
+const fullName = wrap(() => name.value + " " + surname.value);
 
 // Logs: "Jane Doe"
 autorun(() => console.log(fullName.value));
 
 // Updating one of its dependencies will automatically trigger
 // the autorun above, and will print "John Doe" to the console.
-name.value = "John";
+name("John");
 ```
 
 You can destroy an autorun and unsubscribe from all signals it was subscribed to, by calling the returned function.
 
 ```js
-import { signal, computed, autorun } from "ya-signals";
+import { signal, wrap, autorun } from "ya-signals";
 
 const name = signal("Jane");
 const surname = signal("Doe");
-const fullName = computed(() => name.value + " " + surname.value);
+const fullName = wrap(() => name.value + " " + surname.value);
 
 // Logs: "Jane Doe"
 const dispose = autorun(() => console.log(fullName.value));
@@ -129,7 +129,7 @@ dispose();
 // Update does nothing, because no one is subscribed anymore.
 // Even the computed `fullName` signal won't change, because it knows
 // that no one listens to it.
-surname.value = "Doe 2";
+surname("Doe 2");
 ```
 
 ### `reaction(fn,fn)`
@@ -230,13 +230,14 @@ In case when you're receiving a callback that can read some signals, but you don
 ```js
 const counter = signal(0);
 const effectCount = signal(0);
-const fn = () => effectCount.value + 1;
 
 autorun(() => {
 	console.log(counter.value);
 
-	// Whenever this effect is triggered, run `fn` that gives new value
-	effectCount.value = untracked(fn);
+	// Whenever this effect is triggered, run function that gives new value
+	effectCount(untracked(() => {
+    return effectCount.value + 1;
+  }));
 });
 ```
 
@@ -245,11 +246,11 @@ autorun(() => {
 The `transaction` function allows you to combine multiple signal writes into one single update that is triggered at the end when the callback completes.
 
 ```js
-import { signal, computed, autorun, transaction } from "ya-signals";
+import { signal, wrap, autorun, transaction } from "ya-signals";
 
 const name = signal("Jane");
 const surname = signal("Doe");
-const fullName = computed(() => name.value + " " + surname.value);
+const fullName = wrap(() => name.value + " " + surname.value);
 
 // Logs: "Jane Doe"
 autorun(() => console.log(fullName.value));
@@ -257,24 +258,24 @@ autorun(() => console.log(fullName.value));
 // Combines both signal writes into one update. Once the callback
 // returns the `autorun` will trigger and we'll log "Foo Bar"
 transaction(() => {
-	name.value = "Foo";
-	surname.value = "Bar";
+	name("Foo");
+	surname("Bar");
 });
 ```
 
 When you access a signal that you wrote to earlier inside the callback, or access a computed signal that was invalidated by another signal, we'll only update the necessary dependencies to get the current value for the signal you read from. All other invalidated signals will update at the end of the callback function.
 
 ```js
-import { signal, computed, autorun, transaction } from "ya-signals";
+import { signal, wrap, autorun, transaction } from "ya-signals";
 
 const counter = signal(0);
-const double = computed(() => counter.value * 2);
-const triple = computed(() => counter.value * 3);
+const double = wrap(() => counter.value * 2);
+const triple = wrap(() => counter.value * 3);
 
 autorun(() => console.log(double.value, triple.value));
 
 transaction(() => {
-	counter.value = 1;
+	counter(1);
 	// Logs: 2, despite being inside transaction, but `triple`
 	// will only update once the callback is complete
 	console.log(double.value);
@@ -285,7 +286,7 @@ transaction(() => {
 Transactions can be nested and updates will be flushed when the outermost transaction call completes.
 
 ```js
-import { signal, computed, autorun, transaction } from "ya-signals";
+import { signal, wrap, autorun, transaction } from "ya-signals";
 
 const counter = signal(0);
 autorun(() => console.log(counter.value));
@@ -294,7 +295,7 @@ transaction(() => {
 	transaction(() => {
 		// Signal is invalidated, but update is not flushed because
 		// we're still inside another transaction
-		counter.value = 1;
+		counter(1);
 	});
 
 	// Still not updated...
