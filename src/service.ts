@@ -1,4 +1,4 @@
-import { provide, destroy } from "provi/client"
+import { provide, destroy } from 'provi/client'
 
 const INSTANTIATE_KEY = Symbol('instantiate');
 const DESTROY_KEY = Symbol('destroy');

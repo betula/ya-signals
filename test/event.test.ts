@@ -1,9 +1,9 @@
-import { action } from "../src";
+import { event } from "../src";
 
-it('light action works', () => {
+it('light event works', () => {
   const spy = jest.fn();
 
-  const a = action();
+  const a = event();
   a.subscribe(spy);
 
   expect(spy).not.toBeCalled();
@@ -13,10 +13,10 @@ it('light action works', () => {
   expect(spy).toBeCalledTimes(2);
 });
 
-it('params action works', () => {
+it('params event works', () => {
   const spy = jest.fn();
 
-  const a = action<number>();
+  const a = event<number>();
   a.subscribe(spy);
 
   expect(spy).not.toBeCalled();

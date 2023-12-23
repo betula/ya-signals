@@ -21,7 +21,7 @@ npm install ya-signals
     - [`untracked(fn)`](#untrackedfn)
     - [`transaction(fn)`](#transactionfn)
   - [Extra API](#extra-api)
-    - [Simple and fast actions abstraction](#simple-and-fast-actions-abstraction)
+    - [Simple and fast events abstraction](#simple-and-fast-events-abstraction)
     - [Automatic unsubscription control](#automatic-unsubscription-control)
     - [On demand services](#on-demand-services)
     - [Isolated services scope for SSR support](#isolated-services-scope-for-ssr-support)
@@ -306,17 +306,17 @@ transaction(() => {
 
 ## Extra API
 
-### Simple and fast actions abstraction
+### Simple and fast events abstraction
 
 ```typescript
-import { action } from "ya-signals";
+import { event } from "ya-signals"
 
-const userLoggedIn = action()
+const userLoggedIn = event()
 
-// subscribe to the action
+// subscribe to the event
 userLoggedIn.subscribe(listener)
 
-// call the action
+// call the event
 userLoggedIn()
 ```
 

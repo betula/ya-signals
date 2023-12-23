@@ -1,9 +1,9 @@
-import { un } from "unsubscriber";
+import { un } from 'unsubscriber';
 import {
   autorun as autorunOrigin,
   reaction as reactionOrigin,
   when as whenOrigin
-} from "mobx";
+} from 'mobx';
 
 export const autorun = (expression: () => void) => (
   un(autorunOrigin(expression))

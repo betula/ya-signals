@@ -19,6 +19,6 @@ export { un } from 'unsubscriber';
 
 export { autorun, reaction, sync, when } from './reaction';
 
-export { action, type Action, type LightAction } from './action';
+export { event, type Event, type LightEvent } from './event';
 export { service } from './service';
 export { hook } from './hook';

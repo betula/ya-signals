@@ -2,8 +2,7 @@
 
 _React application architecture on MobX._
 
-[![npm version](https://img.shields.io/npm/v/ya-signals?style=flat-square)](https://www.npmjs.com/package/ya-signals)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/ya-signals?style=flat-square)](https://bundlephobia.com/result?p=ya-signals)
+[![npm version](https://img.shields.io/npm/v/ya-signals?style=flat-square)](https://www.npmjs.com/package/ya-signals) [![npm bundle size](https://img.shields.io/bundlephobia/minzip/ya-signals?style=flat-square)](https://bundlephobia.com/result?p=ya-signals)
 
 ## Installation
 
@@ -52,10 +51,32 @@ service.destroy(userService);
 ### Describe component logic in OOP-style
 
 ```typescript
+import { hook, un } from "ya-signals";
+
+class RecipeForm {
+  constructor() {
+    un(() => {
+      // destroy
+    })
+  }
+}
+
+export const useRecipeForm = hook(RecipeForm)
+
+// Somewhere in React component
+const form = useRecipeForm()
+```
+
+**And it can be with params of course**
+
+```typescript
 import { hook, un, type SignalReadonly } from "ya-signals";
 
-export class RecipeForm {
-  constructor(signalParams: SignalReadonly<[number, string]>) {
+// Can be object struct with named fields
+type Params = [number, string];
+
+class RecipeForm {
+  constructor(signalParams: SignalReadonly<Params>) {
     un(() => {
       // destroy
     })
@@ -75,7 +96,8 @@ Somewhere inside React component function
 import { useRecipeForm } from './recipe-form.ts';
 
 function Form() {
-  const form = useRecipeForm([10, 'hello']); // params available here
+  // Params available here
+  const form = useRecipeForm([10, 'hello']);
 
   return <>
   // ...

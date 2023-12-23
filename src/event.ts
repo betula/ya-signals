@@ -1,18 +1,18 @@
-import { event, listen } from 'evemin';
+import { event as originEvent, listen } from 'evemin';
 import { un } from 'unsubscriber';
 
-export interface Action<T> {
+export interface Event<T> {
   <T>(value: T): void;
   subscribe(listener: (value: T) => void): (() => void);
 }
 
-export interface LightAction extends Action<void> {
+export interface LightEvent extends Event<void> {
   (): void;
   subscribe(listener: () => void): (() => void);
 }
 
-export const action = <T = void>(): T extends void ? LightAction : Action<T> => {
-  const fn = event() as any;
+export const event = <T = void>(): T extends void ? LightEvent : Event<T> => {
+  const fn = originEvent() as any;
   fn.subscribe = (listener) => un(listen(fn, listener));
   return fn;
 }
