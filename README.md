@@ -72,24 +72,25 @@ const form = useRecipeForm()
 [![Edit example in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/nostalgic-galileo-p8ylnf?file=%2Fsrc%2FApp.tsx%3A20%2C1)
 
 ```typescript
-import { hook, un, type SignalReadonly } from "ya-signals";
+import { hook, type SignalReadonly } from "ya-signals";
 
 // Can be object struct with named fields
-type Params = [number, string];
+type Params = {
+  count: number;
+  text: string;
+};
 
-class RecipeForm {
-  constructor(signalParams: SignalReadonly<Params>) {
-    un(() => {
-      // destroy
-    })
+class LocalLogic {
+  constructor($params: SignalReadonly<Params>) {
+    console.log("constructor with params", $params.value);
 
-    signalParams.sync((params) => {
-      console.log('Current params values', params);
+    $params.subscribe((params) => {
+      console.log("updated params", params);
     });
   }
 }
 
-export const useRecipeForm = hook(RecipeForm)
+const useLocalLogic = hook(LocalLogic);
 ```
 
 The `signal` documentation see [here](/DOCUMENTATION.md#signalinitialvalue).
@@ -100,8 +101,9 @@ And using it somewhere inside React component function
 import { useRecipeForm } from './recipe-form.ts';
 
 function Form() {
-  // Params available here
-  const form = useRecipeForm([10, 'hello']);
+  const [count, setCount] = useState(() => 1);
+  const [text, setText] = useState(() => "Hello");
+  const logic = useLocalLogic({ count, text });
 
   return <>
   // ...
