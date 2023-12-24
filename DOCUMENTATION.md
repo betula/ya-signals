@@ -401,7 +401,7 @@ const form = useRecipeForm()
 
 **And it can be with params of course**
 
-The `signal` documentation see [here](/DOCUMENTATION.md#signalinitialvalue).
+[![Edit example in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/nostalgic-galileo-p8ylnf?file=%2Fsrc%2FApp.tsx%3A20%2C1)
 
 ```typescript
 import { hook, un, type SignalReadonly } from "ya-signals";
@@ -424,7 +424,9 @@ class RecipeForm {
 export const useRecipeForm = hook(RecipeForm)
 ```
 
-Somewhere inside React component function
+The `signal` documentation see [here](/DOCUMENTATION.md#signalinitialvalue).
+
+And using it somewhere inside React component function
 
 ```typescript
 import { useRecipeForm } from './recipe-form.ts';
