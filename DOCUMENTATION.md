@@ -330,34 +330,56 @@ un(() => {
 
 ### On demand services
 
-```typescript
-import { service, un } from "ya-signals";
+[![Edit example in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/sleepy-field-79wqfh?file=%2Fsrc%2FApp.tsx%3A25%2C1-25%2C11)
 
-class UserServer {
+```typescript
+import { service, makeObservable, observable } from "ya-signals";
+
+// AppService.ts
+
+class AppService {
+  public lang: string;
+
   constructor() {
-    un(() => {
-      // destroy
-    })
+    this.lang = "ru";
+
+    makeObservable(this, {
+      lang: observable.ref, // immutable value
+    });
   }
 }
 
-// On demand service abstraction
-export const userService = service(UserServer)
+// Only Proxy for create class on demand in future
+export const appService = service(AppService);
+```
 
-// If you run `userService.user` it's get user property for on demand created service
-const user = userService.user
+If you run `appService.user` in your code anywhere it's get app property for **on demand** created service
+
+```typescript
+import { observer } from "ya-signals";
+import { appService } from "./AppService.ts"
+
+// App.tsx
+
+export const App = observer(() => {
+  return (
+    <div className="App">
+      <h1>App lang {appService.lang}</h1>
+    </div>
+  );
+});
 ```
 
 In rare cases when it's necessary to initialize a service without invoking any method.
 
 ```typescript
-service.instantiate(userService)
+service.instantiate(appService);
 ```
 
 In rare case when it's necessary to destroy a service manually.
 
 ```typescript
-service.destroy(userService);
+service.destroy(appService);
 ```
 
 ### Isolated services scope for SSR support
