@@ -7,7 +7,6 @@ export {
 
 export { observer } from 'mobx-react-lite';
 export {
-  untracked,
   transaction,
   makeAutoObservable,
   makeObservable,
@@ -25,3 +24,4 @@ export { autorun, reaction, sync, when } from './reaction';
 export { event, type Event, type LightEvent } from './event';
 export { service } from './service';
 export { hook } from './hook';
+export { untracked } from './untracked';

@@ -1,3 +1,4 @@
+import { untracked } from 'mobx';
 import { provide, destroy } from 'provi/client'
 
 const INSTANTIATE_KEY = Symbol('instantiate');
@@ -22,7 +23,7 @@ export const service: ServiceFactory = (<T>(Class: (() => T) | (new () => T)) =>
         return;
       }
       if (!instance) {
-        instance = provide(Class)
+        instance = untracked(() => provide(Class));
       };
       if (prop !== INSTANTIATE_KEY) {
         return instance[prop];
@@ -30,7 +31,7 @@ export const service: ServiceFactory = (<T>(Class: (() => T) | (new () => T)) =>
     },
     set(_target, prop, value) {
       if (!instance) {
-        instance = provide(Class);
+        instance = untracked(() => provide(Class));
       }
       instance[prop] = value;
       return true;

@@ -2,6 +2,8 @@ import React from 'react';
 import { scope } from 'unsubscriber';
 import { SignalReadonly, autorun, hook, signal, un } from "../src";
 
+const waitNextTick = () => new Promise(resolve => setTimeout(resolve, 0));
+
 let useMemoCache;
 let unmount;
 let unsubs;
@@ -63,7 +65,7 @@ it('hook works', () => {
   expect(destroy_spy).toBeCalled();
 });
 
-it('hook array params works', () => {
+it('hook array params works', async () => {
   const create_spy = jest.fn();
   const destroy_spy = jest.fn();
   const params_spy = jest.fn();
@@ -85,12 +87,15 @@ it('hook array params works', () => {
 
   expect(params_spy).toBeCalledWith([10, 'a']); params_spy.mockClear();
   expect(inst).toBe(useA([10, 'a']));
+  await waitNextTick();
   expect(params_spy).not.toBeCalled();
 
   expect(inst).toBe(useA([10, 'b']));
+  await waitNextTick();
   expect(params_spy).toBeCalledWith([10, 'b']); params_spy.mockClear();
 
   expect(inst).toBe(useA([10, 'b']));
+  await waitNextTick();
   expect(params_spy).not.toBeCalled();
 
   expect(create_spy).toBeCalled();
@@ -100,7 +105,7 @@ it('hook array params works', () => {
   expect(destroy_spy).toBeCalled();
 });
 
-it('hook struct params works', () => {
+it('hook struct params works', async () => {
   const create_spy = jest.fn();
   const destroy_spy = jest.fn();
   const params_spy = jest.fn();
@@ -122,12 +127,15 @@ it('hook struct params works', () => {
 
   expect(params_spy).toBeCalledWith({a: 10, b: 'a'}); params_spy.mockClear();
   expect(inst).toBe(useA({a: 10, b: 'a'}));
+  await waitNextTick();
   expect(params_spy).not.toBeCalled();
 
   expect(inst).toBe(useA({a: 10, b: 'b'}));
+  await waitNextTick();
   expect(params_spy).toBeCalledWith({a: 10, b: 'b'}); params_spy.mockClear();
 
   expect(inst).toBe(useA({a: 10, b: 'b'}));
+  await waitNextTick();
   expect(params_spy).not.toBeCalled();
 
   expect(create_spy).toBeCalled();
