@@ -14,7 +14,7 @@ export interface Signal<T> extends SignalReadonly<T> {
 }
 
 export function signal<T>(value: T): Signal<T> {
-    const box = observable.box(value, { equals: comparer.default });
+    const box = observable.box(value, { equals: comparer.default, deep: false });
     const get = box.get.bind(box);
     const set = box.set.bind(box);
     return make(get, set);
