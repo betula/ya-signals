@@ -401,6 +401,8 @@ const form = useRecipeForm()
 
 **And it can be with params of course**
 
+The `signal` documentation see [here](/DOCUMENTATION.md#signalinitialvalue).
+
 ```typescript
 import { hook, un, type SignalReadonly } from "ya-signals";
 
