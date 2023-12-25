@@ -45,7 +45,7 @@ class AppService {
 export const appService = service(AppService);
 ```
 
-If you run `appService.user` in your code anywhere it's get app property for **on demand** created service
+If you run `appService.lang` in your code anywhere it's get app property for **on demand** created service
 
 ```typescript
 import { observer } from "ya-signals";
