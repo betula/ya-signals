@@ -22,6 +22,6 @@ jobs:
       - run: npm install -g yarn
       - run: yarn
       - run: yarn run test:all --coverage
-      - uses: coverallsapp/github-action@master
+      - uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
