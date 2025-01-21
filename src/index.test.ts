@@ -1,9 +1,13 @@
-import { wrap, reaction, signal, transaction, sync, when } from "../src";
+import { expect, it, vi } from 'vitest';
+import { reaction, signal, sync, transaction, when, wrapSignal } from '.';
 
 it('signal works', () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   const s = signal(0);
-  sync(() => s.value, (v) => spy(v));
+  sync(
+    () => s.value,
+    v => spy(v),
+  );
   s(1);
   s(s.value + 1);
 
@@ -14,11 +18,14 @@ it('signal works', () => {
 });
 
 it('wrap works', () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   const a = signal(0);
   const b = signal(0);
-  const c = wrap(() => a.value + b.value);
-  sync(() => c.value, (v) => spy(v));
+  const c = wrapSignal(() => a.value + b.value);
+  sync(
+    () => c.value,
+    v => spy(v),
+  );
   a(1);
 
   transaction(() => {
@@ -38,9 +45,12 @@ it('wrap works', () => {
 });
 
 it('reaction works', () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   const s = signal(0);
-  reaction(() => s.value, (v) => spy(v));
+  reaction(
+    () => s.value,
+    v => spy(v),
+  );
   expect(spy).not.toBeCalled();
 
   s(s.value + 1);
@@ -53,9 +63,12 @@ it('reaction works', () => {
 });
 
 it('sync works', () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   const s = signal(0);
-  sync(() => s.value, (v) => spy(v));
+  sync(
+    () => s.value,
+    v => spy(v),
+  );
   expect(spy).toBeCalled();
 
   s(s.value + 1);
@@ -69,7 +82,7 @@ it('sync works', () => {
 });
 
 it('when works', async () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   const s = signal(0);
   when(() => s.value > 0).then(() => spy());
   await new Promise(r => setTimeout(() => r(0), 0));
@@ -80,14 +93,13 @@ it('when works', async () => {
 });
 
 it('when rejected works', async () => {
-  const spy = jest.fn();
+  const spy = vi.fn();
   try {
     await when(() => {
       throw 0;
-    })
-  }
-  catch {
-    spy()
+    });
+  } catch {
+    spy();
   }
   expect(spy).toBeCalled();
 });
