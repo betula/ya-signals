@@ -1,10 +1,14 @@
-# @volga/signals
+# Ya Signals
 
-_Application architecture on MobX._
-
+_React application architecture on MobX._
 
 [![npm version](https://img.shields.io/npm/v/ya-signals?style=flat-square)](https://www.npmjs.com/package/ya-signals) [![npm bundle size](https://img.shields.io/bundlephobia/minzip/ya-signals?style=flat-square)](https://bundlephobia.com/result?p=ya-signals)
 
+## Installation
+
+```bash
+npm install ya-signals
+```
 
 ## Общие положения
 
