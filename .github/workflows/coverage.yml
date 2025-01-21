@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
+      - run: npm install -g yarn
       - run: yarn i
       - run: yarn run test:all --coverage
       - uses: coverallsapp/github-action@master
