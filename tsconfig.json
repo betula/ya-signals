@@ -1,12 +1,30 @@
 {
-    "compilerOptions": {
-      "target": "es2018",
-      "module": "esnext",
-      "outDir": "./dist",
-      "moduleResolution": "node",
-      "declaration": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true
-    },
-    "include": ["src"]
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    /********************* Bundler mode *********************/
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    /********************* Linting *********************/
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "types": ["node", "vite/client"],
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./index.ts"],
+  "exclude": ["node_modules", "../**/src/**/*.test.ts", "../**/src/**/*.test.tsx", "**/setupTests.ts"]
   }

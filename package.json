@@ -1,16 +1,14 @@
 {
   "name": "ya-signals",
-  "version": "0.9.14",
-  "description": "React application architecture on MobX.",
-  "main": "dist/index.js",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "README.md"
   ],
-  "scripts": {
-    "test": "jest",
-    "build": "tsc"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/betula/ya-signals.git"
@@ -26,28 +24,34 @@
     "mobx",
     "signals"
   ],
-  "author": "Slava Bereza <mail@betula.co>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/betula/ya-signals/issues"
+  "scripts": {
+    "test": "vitest --changed",
+    "test:ci": "vitest",
+    "test:all": "vitest",
+    "lint": "eslint \"./src/**/*.{ts,tsx}\" --format=codeframe",
+    "lint:fix": "yarn run lint --fix",
+    "ts-check": "tsc --noEmit",
+    "type:check": "tsc --noEmit",
+    "format": "prettier \"./src/**/*.{ts,tsx}\" -w",
+    "build": "tsup"
   },
-  "homepage": "https://github.com/betula/ya-signals#readme",
   "dependencies": {
-    "mobx": "6.12.0",
-    "mobx-react-lite": "4.0.5",
-    "unsubscriber": "2.2.0",
-    "provi": "2.3.3",
-    "evemin": "2.0.0"
+    "mobx": "6.12.3",
+    "mobx-react-lite": "4.0.7",
+    "mobx-utils": "6.0.8"
   },
   "peerDependencies": {
-    "react" : "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.3",
-    "jest": "^29.6.2",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.1.6",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.21",
+    "@vitest/coverage-v8": "3.0.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-test-renderer": "^18.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.1.6",
+    "vitest": "3.0.2"
   }
 }

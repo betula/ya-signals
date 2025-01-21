@@ -1,18 +1,60 @@
-import { event as originEvent, listen } from 'evemin';
-import { un } from 'unsubscriber';
+import { un } from './unsubscriber';
 
-export interface Event<T> {
-  <T>(value: T): void;
-  subscribe(listener: (value: T) => void): (() => void);
+/*
+Modern and blazing fast event emitter
+
+- Zero-cost abstraction
+- High performance
+- Super small
+
+🌈 2x times faster standard node.js event emitter
+ */
+
+const LISTENERS = Symbol('listeners');
+
+interface EventParametrized<T> {
+  [LISTENERS]: ((value: T) => void)[];
+  (listener: (value: T) => void): () => void;
+  fire(value: T): void;
+  connect(source: Event<T>): () => void;
+  clear(): void;
 }
 
-export interface LightEvent extends Event<void> {
-  (): void;
-  subscribe(listener: () => void): (() => void);
+interface EventLite extends EventParametrized<void> {
+  [LISTENERS]: (() => void)[];
+  (listener: () => void): () => void;
+  fire(): void;
 }
 
-export const event = <T = void>(): T extends void ? LightEvent : Event<T> => {
-  const fn = originEvent() as any;
-  fn.subscribe = (listener) => un(listen(fn, listener));
-  return fn;
-}
+export type Event<T = void> = [T] extends [void] ? EventLite : EventParametrized<T>;
+
+const subscribe = <T>(ev: Event<T>, fn: (value?: T) => void) => {
+  if (!ev[LISTENERS].includes(fn)) {
+    ev[LISTENERS] = ev[LISTENERS].concat(fn);
+  }
+  return () => {
+    ev[LISTENERS] = ev[LISTENERS].filter(f => f !== fn);
+  };
+};
+
+export const event = <T = void>(): Event<T> => {
+  const ev = ((listener: (value?: T) => void) => un(subscribe(ev, listener))) as Event<T>;
+  const fire = (data: T) => {
+    const listeners = ev[LISTENERS];
+    // eslint-disable-next-line unicorn/no-for-loop
+    for (let i = 0; i < listeners.length; i++) {
+      listeners[i]?.(data);
+    }
+  };
+  const connect = (source: Event<T>) => {
+    return source(fire as () => void);
+  };
+  const clear = () => {
+    ev[LISTENERS] = [];
+  };
+  ev[LISTENERS] = [];
+  ev.fire = fire;
+  ev.connect = connect;
+  ev.clear = clear;
+  return ev;
+};

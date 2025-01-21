@@ -1,19 +1,13 @@
-# Ya Signals
+# Signals
 
 _React application architecture on MobX._
 
-## Installation
-
-```bash
-npm install ya-signals
-```
-
-- [Ya Signals](#ya-signals)
+- [Signals](#signals)
   - [Installation](#installation)
   - [React Integration](#react-integration)
   - [Guide / API](#guide--api)
     - [`signal(initialValue)`](#signalinitialvalue)
-    - [`wrap(fn)`](#wrapfn)
+    - [`wrapSignal(fn)`](#wrapsignalfn)
     - [`autorun(fn)`](#autorunfn)
     - [`reaction(fn,fn)`](#reactionfnfn)
     - [`sync(fn,fn)`](#syncfnfn)
@@ -24,7 +18,6 @@ npm install ya-signals
     - [Simple and fast events abstraction](#simple-and-fast-events-abstraction)
     - [Automatic unsubscription control](#automatic-unsubscription-control)
     - [On demand services](#on-demand-services)
-    - [Isolated services scope for SSR support](#isolated-services-scope-for-ssr-support)
     - [Describe component logic in OOP-style](#describe-component-logic-in-oop-style)
   - [License](#license)
 
@@ -33,7 +26,7 @@ npm install ya-signals
 React adapter allows you to access signals directly inside your components and will automatically subscribe to them.
 
 ```typescript
-import { observer, signal } from "ya-signals";
+import { observer, signal } from "@volga/signals";
 
 const count = signal(0);
 
@@ -55,7 +48,7 @@ In practice this makes MobX applications very well optimized out of the box and 
 The `signal` function creates a new signal. A signal is a container for a value that can change over time. You can read a signal's value or subscribe to value updates by accessing its `.value` property.
 
 ```js
-import { signal } from "ya-signals";
+import { signal } from '@volga/signals';
 
 const counter = signal(0);
 
@@ -68,57 +61,57 @@ counter(1);
 
 Writing to a signal is done by calling as a function. Changing a signal's value synchronously updates every [computed](#computedfn) and [autorun](#autorunfn) that depends on that signal, ensuring your app state is always consistent.
 
-### `wrap(fn)`
+### `wrapSignal(fn)`
 
-Data is often derived from other pieces of existing data. The `wrap` function lets you combine the values of multiple signals into a new signal that can be reacted to, or even used by additional computeds. When the signals accessed from within a computed callback change, the computed callback is re-executed and its new return value becomes the computed signal's value.
+Data is often derived from other pieces of existing data. The `wrapSignal` function lets you combine the values of multiple signals into a new signal that can be reacted to, or even used by additional computeds. When the signals accessed from within a computed callback change, the computed callback is re-executed and its new return value becomes the computed signal's value.
 
 ```js
-import { signal, wrap } from "ya-signals";
+import { signal, wrapSignal } from '@volga/signals';
 
-const name = signal("Jane");
-const surname = signal("Doe");
+const name = signal('Jane');
+const surname = signal('Doe');
 
-const fullName = wrap(() => name.value + " " + surname.value);
+const fullName = wrapSignal(() => name.value + ' ' + surname.value);
 
 // Logs: "Jane Doe"
 console.log(fullName.value);
 
-// Updates flow through wrap, but only if someone
+// Updates flow through wrapSignal, but only if someone
 // subscribes to it. More on that later.
-name("John");
+name('John');
 // Logs: "John Doe"
 console.log(fullName.value);
 ```
 
-Any signal that is accessed inside the `wrap`'s callback function will be automatically subscribed to and tracked as a dependency of the struct computed signal.
+Any signal that is accessed inside the `wrapSignal`'s callback function will be automatically subscribed to and tracked as a dependency of the struct computed signal.
 
 ### `autorun(fn)`
 
-The `autorun` function is the last piece that makes everything reactive. When you access a signal inside its callback function, that signal and every dependency of said signal will be activated and subscribed to. In that regard it is very similar to [`wrap(fn)`](#wrapfn). By default all updates are lazy, so nothing will update until you access a signal inside `autorun`.
+The `autorun` function is the last piece that makes everything reactive. When you access a signal inside its callback function, that signal and every dependency of said signal will be activated and subscribed to. In that regard it is very similar to [`wrapSignal(fn)`](#wrapsignalfn). By default all updates are lazy, so nothing will update until you access a signal inside `autorun`.
 
 ```js
-import { signal, wrap, autorun } from "ya-signals";
+import { signal, wrapSignal, autorun } from '@volga/signals';
 
-const name = signal("Jane");
-const surname = signal("Doe");
-const fullName = wrap(() => name.value + " " + surname.value);
+const name = signal('Jane');
+const surname = signal('Doe');
+const fullName = wrapSignal(() => name.value + ' ' + surname.value);
 
 // Logs: "Jane Doe"
 autorun(() => console.log(fullName.value));
 
 // Updating one of its dependencies will automatically trigger
 // the autorun above, and will print "John Doe" to the console.
-name("John");
+name('John');
 ```
 
 You can destroy an autorun and unsubscribe from all signals it was subscribed to, by calling the returned function.
 
 ```js
-import { signal, wrap, autorun } from "ya-signals";
+import { signal, wrapSignal, autorun } from '@volga/signals';
 
-const name = signal("Jane");
-const surname = signal("Doe");
-const fullName = wrap(() => name.value + " " + surname.value);
+const name = signal('Jane');
+const surname = signal('Doe');
+const fullName = wrapSignal(() => name.value + ' ' + surname.value);
 
 // Logs: "Jane Doe"
 const dispose = autorun(() => console.log(fullName.value));
@@ -129,7 +122,7 @@ dispose();
 // Update does nothing, because no one is subscribed anymore.
 // Even the computed `fullName` signal won't change, because it knows
 // that no one listens to it.
-surname("Doe 2");
+surname('Doe 2');
 ```
 
 ### `reaction(fn,fn)`
@@ -139,43 +132,43 @@ surname("Doe 2");
 The typical pattern is that you produce the things you need in your side effect in the data function, and in that way control more precisely when the effect triggers. By default, the result of the data function has to change in order for the effect function to be triggered.
 
 ```typescript
-import { signal, reaction } from "ya-signals"
+import { signal, reaction } from '@volga/signals';
 
 class Animal {
-  name = signal(0)
-  energyLevel = signal(0)
+  name = signal(0);
+  energyLevel = signal(0);
 
   constructor(name) {
-    this.name(name)
-    this.energyLevel(100)
+    this.name(name);
+    this.energyLevel(100);
   }
 
   reduceEnergy() {
-    this.energyLevel.update(v => v - 10)
+    this.energyLevel.update(v => v - 10);
   }
 
   get isHungry() {
-    return this.energyLevel.value < 50
+    return this.energyLevel.value < 50;
   }
 }
 
-const giraffe = new Animal("Gary")
+const giraffe = new Animal('Gary');
 
 reaction(
   () => giraffe.isHungry,
   isHungry => {
     if (isHungry) {
-        console.log("Now I'm hungry!")
+      console.log("Now I'm hungry!");
     } else {
-        console.log("I'm not hungry!")
+      console.log("I'm not hungry!");
     }
-    console.log("Energy level:", giraffe.energyLevel.value)
-  }
-)
+    console.log('Energy level:', giraffe.energyLevel.value);
+  },
+);
 
-console.log("Now let's change state!")
+console.log("Now let's change state!");
 for (let i = 0; i < 10; i++) {
-  giraffe.reduceEnergy()
+  giraffe.reduceEnergy();
 }
 ```
 
@@ -184,20 +177,21 @@ for (let i = 0; i < 10; i++) {
 `sync` is like [`reaction`](#reactionfnfn), but the effect function should immediately be triggered after the first run of the data function.
 
 ```typescript
-import { sync } from "ya-signals"
+import { sync } from '@volga/signals';
 
 class List {
   constructor(authService) {
     sync(
       () => authService.isLoggedIn, // data function
-      (loggedIn) => {               // effect function
+      loggedIn => {
+        // effect function
         if (loggedIn) {
-          this.initUserData()
+          this.initUserData();
         } else {
-          this.clearUserData()
+          this.clearUserData();
         }
-      }
-    )
+      },
+    );
   }
   initUserData() {}
   clearUserData() {}
@@ -213,7 +207,7 @@ The `when` function returns a `Promise` with `cancel` method allowing you to can
 This combines nicely with `async / await` to let you wait for changes in reactive state.
 
 ```typescript
-import { when } from "ya-signals"
+import { when } from "@volga/signals"
 
 async function() {
   await when(() => that.isVisible)
@@ -235,9 +229,11 @@ autorun(() => {
   console.log(counter.value);
 
   // Whenever this effect is triggered, run function that gives new value
-  effectCount(untracked(() => {
-    return effectCount.value + 1;
-  }));
+  effectCount(
+    untracked(() => {
+      return effectCount.value + 1;
+    }),
+  );
 });
 ```
 
@@ -246,11 +242,11 @@ autorun(() => {
 The `transaction` function allows you to combine multiple signal writes into one single update that is triggered at the end when the callback completes.
 
 ```js
-import { signal, wrap, autorun, transaction } from "ya-signals";
+import { signal, wrapSignal, autorun, transaction } from '@volga/signals';
 
-const name = signal("Jane");
-const surname = signal("Doe");
-const fullName = wrap(() => name.value + " " + surname.value);
+const name = signal('Jane');
+const surname = signal('Doe');
+const fullName = wrapSignal(() => name.value + ' ' + surname.value);
 
 // Logs: "Jane Doe"
 autorun(() => console.log(fullName.value));
@@ -258,19 +254,19 @@ autorun(() => console.log(fullName.value));
 // Combines both signal writes into one update. Once the callback
 // returns the `autorun` will trigger and we'll log "Foo Bar"
 transaction(() => {
-  name("Foo");
-  surname("Bar");
+  name('Foo');
+  surname('Bar');
 });
 ```
 
 When you access a signal that you wrote to earlier inside the callback, or access a computed signal that was invalidated by another signal, we'll only update the necessary dependencies to get the current value for the signal you read from. All other invalidated signals will update at the end of the callback function.
 
 ```js
-import { signal, wrap, autorun, transaction } from "ya-signals";
+import { signal, wrapSignal, autorun, transaction } from '@volga/signals';
 
 const counter = signal(0);
-const double = wrap(() => counter.value * 2);
-const triple = wrap(() => counter.value * 3);
+const double = wrapSignal(() => counter.value * 2);
+const triple = wrapSignal(() => counter.value * 3);
 
 autorun(() => console.log(double.value, triple.value));
 
@@ -286,7 +282,7 @@ transaction(() => {
 Transactions can be nested and updates will be flushed when the outermost transaction call completes.
 
 ```js
-import { signal, wrap, autorun, transaction } from "ya-signals";
+import { signal, wrapSignal, autorun, transaction } from '@volga/signals';
 
 const counter = signal(0);
 autorun(() => console.log(counter.value));
@@ -303,21 +299,20 @@ transaction(() => {
 // Now the callback completed and we'll trigger the autorun.
 ```
 
-
 ## Extra API
 
 ### Simple and fast events abstraction
 
 ```typescript
-import { event } from "ya-signals"
+import { event } from '@volga/signals';
 
-const userLoggedIn = event()
+const onUserLoggedIn = event();
 
 // subscribe to the event
-userLoggedIn.subscribe(listener)
+onUserLoggedIn(listener);
 
 // call the event
-userLoggedIn()
+onUserLoggedIn.fire();
 ```
 
 ### Automatic unsubscription control
@@ -325,15 +320,13 @@ userLoggedIn()
 ```typescript
 un(() => {
   // unsubscribe your event listeners here
-})
+});
 ```
 
 ### On demand services
 
-[![Edit example in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/sleepy-field-79wqfh?file=%2Fsrc%2FApp.tsx%3A25%2C1-25%2C11)
-
 ```typescript
-import { service, makeObservable, observable } from "ya-signals";
+import { service, makeObservable, observable } from '@volga/signals';
 
 // AppService.ts
 
@@ -341,7 +334,7 @@ class AppService {
   public lang: string;
 
   constructor() {
-    this.lang = "ru";
+    this.lang = 'ru';
 
     makeObservable(this, {
       lang: observable.ref, // immutable value
@@ -356,7 +349,7 @@ export const appService = service(AppService);
 If you run `appService.user` in your code anywhere it's get app property for **on demand** created service
 
 ```typescript
-import { observer } from "ya-signals";
+import { observer } from "@volga/signals";
 import { appService } from "./AppService.ts"
 
 // App.tsx
@@ -382,51 +375,30 @@ In rare case when it's necessary to destroy a service manually.
 service.destroy(appService);
 ```
 
-### Isolated services scope for SSR support
-
-Isolation of async scopes (only in node environment)
-
-Run your app in isolated Service Provider scope. All instances cached for this will be isolated from all cached instances in other scopes. Useful for implementing SSR.
-
-```typescript
-import { isolate } from "provi/ssr"
-
-const html = await isolate(async () => {
-  // Isolated instance of appService created on demand here, 
-  // by calling run method contains state initialization requests
-  await appService.run();
-  // ...
-  return ReactDOMServer.renderToString(<App />);
-});
-```
-
-Each isolated instance will be destroyed at the end of the isolated asynchronous function.
-
 ### Describe component logic in OOP-style
 
 ```typescript
-import { hook, un } from "ya-signals";
+import { hook, un } from '@volga/signals';
 
 class RecipeForm {
-  constructor() {
+  constructor() {}
+  init() {
     un(() => {
       // destroy
-    })
+    });
   }
 }
 
-export const useRecipeForm = hook(RecipeForm)
+export const useRecipeForm = hook(RecipeForm);
 
 // Somewhere in React component
-const form = useRecipeForm()
+const form = useRecipeForm();
 ```
 
 **And it can be with params of course**
 
-[![Edit example in Codesandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/nostalgic-galileo-p8ylnf?file=%2Fsrc%2FApp.tsx%3A20%2C1)
-
 ```typescript
-import { hook, type SignalReadonly } from "ya-signals";
+import { reaction, hook, type StructSignalReadonly } from '@volga/signals';
 
 // Can be object struct with named fields
 type Params = {
@@ -435,19 +407,23 @@ type Params = {
 };
 
 class LocalLogic {
-  constructor($params: SignalReadonly<Params>) {
-    console.log("constructor with params", $params.value);
-
-    $params.subscribe((params) => {
-      console.log("updated params", params);
-    });
+  constructor(private params: StructSignalReadonly<Params>) {
+    console.log('Count from params', params.count);
+  }
+  init() {
+    reaction(
+      () => this.params.text,
+      text => {
+        console.log('Text updated', text);
+      },
+    );
   }
 }
 
 const useLocalLogic = hook(LocalLogic);
 ```
 
-The `signal` documentation see [here](/DOCUMENTATION.md#signalinitialvalue).
+The `signal` documentation see [here](#signalinitialvalue).
 
 And using it somewhere inside React component function
 
@@ -463,6 +439,3 @@ function Form() {
   // ...
 }
 ```
-
-## License
-ISC
