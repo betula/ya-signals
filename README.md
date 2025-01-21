@@ -31,7 +31,7 @@ observer; // из mobx-react-lite
 Например:
 
 ```typescript
-import { makeAutoObservable, observer } from "@volga/signals"
+import { makeAutoObservable, observer } from "ya-signals"
 
 class Some {
   constructor() {
@@ -47,7 +47,7 @@ const App = observer(() => {
 ## Сервисы
 
 ```typescript
-import { service, makeAutoObservable, observable } from '@volga/signals';
+import { service, makeAutoObservable, observable } from 'ya-signals';
 
 class AppService {
   public lang: string;
@@ -63,7 +63,7 @@ export const appService = service(AppService);
 Функция `service` вернет прокси, который инициализирует класс `AppService` при первом использовании, например, когда будет использован `appService.lang`.
 
 ```typescript
-import { observer } from "@volga/signals";
+import { observer } from "ya-signals";
 import { appService } from "./AppService.ts"
 
 export const App = observer(() => {
@@ -120,7 +120,7 @@ function bootstrap() {
 Сайд-эффекты необходимо создавать внутри отдельного метода `init` внутри класса сервиса. В контексте выполнения этого метода доступна функция `un` для регистрации отписчиков. Именно внутри `init` нужно описывать реакции и реактивные синхронизации через `reaction` и `autorun`.
 
 ```typescript
-import { makeAutoObservable, reaction } from '@volga/signals';
+import { makeAutoObservable, reaction } from 'ya-signals';
 
 class AppService {
   public lang: string;
@@ -174,7 +174,7 @@ service.mock(appService, {
 Логика компонентов должна быть описана в том же стиле, что и логика сервисов. Это классы, которые инстанциируются по требованию к компоненте React, и уничтожаются со смертью компонента. Сайд эффекты инициализируются так же как и в сервисах в методе `init`.
 
 ```typescript
-import { hook, un } from '@volga/signals';
+import { hook, un } from 'ya-signals';
 
 class RecipeForm {
   title = '';
@@ -218,7 +218,7 @@ const Form = () => {
 ### Если нужны параметры
 
 ```typescript
-import { reaction, hook, type StructSignalReadonly } from '@volga/signals';
+import { reaction, hook, type StructSignalReadonly } from 'ya-signals';
 
 // Can be object struct with named fields or tuple
 type Params = {
@@ -273,7 +273,7 @@ function Form() {
 > А оптимизация как известно должна быть только там где она нужна, лучше используйте более простые возможности когда оптимизация преждевремена.**
 
 ```typescript
-import { useStructSignal, useSignal, observer, hook } from "@volga/signals"
+import { useStructSignal, useSignal, observer, hook } from "ya-signals"
 
 const ParentComponent = () => {
   const [value, setValue] = useState();
@@ -370,7 +370,7 @@ export const onPastToClipboard = event<ClipboardType>();
 Либо использование внутри класса:
 
 ```typescript
-import { event } from "@volga/signals"
+import { event } from "ya-signals"
 
 class ClipboardPlugin {
   public onPastToClipboard = event<ClipboardType>()
