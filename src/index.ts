@@ -35,7 +35,7 @@ export { autorun, reaction, sync, when } from './reaction';
 
 export { contextHook } from './contextHook';
 export { event, type Event } from './event';
-export { service, isolate, isolated, initAsyncHooksZonator } from './service';
+export { service, isolate, isolated, scoped, ScopedAsyncResource, initAsyncHooksZonator } from './service';
 export { hook, type HookWithParams, type HookWithoutParams } from './hook';
 export { untracked } from './untracked';
 

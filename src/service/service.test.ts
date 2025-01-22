@@ -2,6 +2,7 @@ import { expect, it, vi } from 'vitest';
 import { Initable, signal, un, wrapSignal } from '..';
 import { service } from './service';
 import { getGlobalServicesRegistry } from './ServiceHandler';
+import { initAsyncHooksZonator, isolate } from '.';
 
 it('service works', () => {
   const create_spy = vi.fn();
@@ -246,4 +247,60 @@ it('destroy all should works', () => {
   expect(spy_c).toBeCalled();
 
   expect(getGlobalServicesRegistry().size).toBe(0);
+});
+
+it('service isolation', async () => {
+  await initAsyncHooksZonator();
+
+  class A {
+    a = 10;
+    test() {
+      return this.a;
+    }
+  }
+
+  const a = service(A);
+
+  expect(a.test()).toBe(10);
+
+  await isolate(async () => {
+    class B extends A {
+      b = 5;
+      test() {
+        return this.a + this.b;
+      }
+    }
+
+    service.override(a, B);
+
+    expect(a.test()).toBe(15);
+  });
+
+  expect(a.test()).toBe(10);
+
+  class D {
+    a = 10;
+    test() {
+      return this.a;
+    }
+  }
+
+  const d = service(D);
+
+  class C extends D {
+    c = 2;
+    test() {
+      return this.a - this.c;
+    }
+  }
+
+  service.override(d, C);
+
+  expect(d.test()).toBe(8);
+
+  await isolate(async () => {
+    expect(d.test()).toBe(8);
+  });
+
+  expect(d.test()).toBe(8);
 });

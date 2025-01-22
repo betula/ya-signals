@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { beforeAll, expect, it, vi } from 'vitest';
 import { service, un } from '..';
 import { getZoneId } from './zones';
-import { initAsyncHooksZonator, isolate } from '.';
+import { initAsyncHooksZonator, isolate, ScopedAsyncResource } from '.';
 
 beforeAll(async () => {
   await initAsyncHooksZonator();
@@ -124,6 +124,76 @@ it('isolate works', async () => {
 
     expect(destroy_spy).not.toBeCalled();
   });
+  expect(destroy_spy).toBeCalledWith(9);
+  destroy_spy.mockClear();
+
+  expect(a.value).toBe(10);
+});
+
+it('ScopedAsyncResource works', async () => {
+  const destroy_spy = vi.fn();
+  class A {
+    value = 0;
+
+    init() {
+      un(() => destroy_spy(this.value));
+    }
+  }
+
+  const a = service(A);
+
+  a.value = 10;
+
+  const zone_id_0 = getZoneId();
+
+  const asyncResource = new ScopedAsyncResource('test');
+
+  let storedResolve: (value: void) => void;
+  const promise = new Promise<void>(resolve => (storedResolve = resolve));
+
+  asyncResource.runInAsyncScope(() => {
+    expect(a.value).toBe(0);
+    a.value = 11;
+
+    const zone_id_1 = getZoneId();
+    expect(zone_id_1).not.toBe(zone_id_0);
+
+    // Test that nested async operation not change current zone
+    process.nextTick(() =>
+      (async () => {
+        const zone_id_async_1 = getZoneId();
+        expect(zone_id_async_1).toBe(zone_id_1);
+        expect(a.value).toBe(11);
+
+        a.value = 12;
+        expect(a.value).toBe(12);
+      })().then(() => {
+        storedResolve();
+      }),
+    );
+
+    expect(a.value).toBe(11);
+    expect(destroy_spy).not.toBeCalled();
+  });
+
+  await promise;
+
+  asyncResource.emitDestroy();
+  expect(destroy_spy).toBeCalledWith(12);
+  destroy_spy.mockClear();
+
+  expect(zone_id_0).toBe(getZoneId());
+  expect(a.value).toBe(10);
+
+  // Next serial isolated resource
+  const asyncResource2 = new ScopedAsyncResource('test2');
+  asyncResource2.runInAsyncScope(() => {
+    expect(a.value).toBe(0);
+    a.value = 9;
+    expect(destroy_spy).not.toBeCalled();
+  });
+
+  asyncResource2.emitDestroy();
   expect(destroy_spy).toBeCalledWith(9);
   destroy_spy.mockClear();
 

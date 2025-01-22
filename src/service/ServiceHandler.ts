@@ -27,6 +27,8 @@ export const getGlobalServicesRegistry = () => {
   return globalServicesRegistryByZones.get(zoneId)!;
 };
 
+type Configure<T extends object> = (instance: T & ServiceInternal<T>) => void;
+
 /**
  * Registry of all currently active services
  * Necessary for destroy all machanism
@@ -43,6 +45,17 @@ class ServiceState<T extends object> {
    * Set of destroy listeners
    */
   public unsubs = unsubscriber();
+
+  constructor(
+    /**
+     * Service class can be overrided in child packages
+     */
+    public FinalClass: Ctor<T>,
+    /**
+     * List of configures functions
+     */
+    public configures: Configure<T>[] = [],
+  ) {}
 }
 
 /**
@@ -55,14 +68,9 @@ export class ServiceHandler<T extends object> {
   private stateByZones = new Map<ZoneId, ServiceState<T>>();
 
   /**
-   * Service class can be overrided in child packages
+   * Root zone state
    */
-  private FinalClass: Ctor<T>;
-
-  /**
-   * List of configures functions
-   */
-  private configures: ((instance: T & ServiceInternal<T>) => void)[] = [];
+  private rootZoneState: ServiceState<T>;
 
   /**
    * Proxy of service
@@ -73,7 +81,8 @@ export class ServiceHandler<T extends object> {
    * Service handler constructor
    */
   constructor(Class: Ctor<T>) {
-    this.FinalClass = Class;
+    this.rootZoneState = new ServiceState<T>(Class);
+    this.stateByZones.set(0, this.rootZoneState);
     this.proxy = this.createProxy();
   }
 
@@ -190,7 +199,7 @@ export class ServiceHandler<T extends object> {
     const zoneId = getZoneId();
     let state = this.stateByZones.get(zoneId);
     if (!state) {
-      state = new ServiceState();
+      state = new ServiceState<T>(this.rootZoneState.FinalClass, [...this.rootZoneState.configures]);
       this.stateByZones.set(zoneId, state);
     }
     return state;
@@ -208,6 +217,27 @@ export class ServiceHandler<T extends object> {
    */
   private set rawInstance(value: T | undefined) {
     this.getStateByCurrentZone().rawInstance = value;
+  }
+
+  /**
+   * Zoned get final class
+   */
+  private get finalClass(): Ctor<T> {
+    return this.getStateByCurrentZone().FinalClass;
+  }
+
+  /**
+   * Zoned set final class
+   */
+  private set finalClass(value: Ctor<T>) {
+    this.getStateByCurrentZone().FinalClass = value;
+  }
+
+  /**
+   * Zoned get configures
+   */
+  private get configures(): ((instance: T & ServiceInternal<T>) => void)[] {
+    return this.getStateByCurrentZone().configures;
   }
 
   /**
@@ -232,7 +262,7 @@ export class ServiceHandler<T extends object> {
   public ensureInstantiate() {
     if (!this.rawInstance) {
       untracked(() => {
-        this.rawInstance = new this.FinalClass();
+        this.rawInstance = new this.finalClass();
         this.register();
         this.runConfigures();
         this.runInit();
@@ -247,7 +277,7 @@ export class ServiceHandler<T extends object> {
     if (this.rawInstance) {
       throw new Error('You should override service before its instantiate');
     }
-    this.FinalClass = OverridedClass;
+    this.finalClass = OverridedClass;
   }
 
   /**
